@@ -35,6 +35,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <ctime>
 
 namespace nvcomp
 {

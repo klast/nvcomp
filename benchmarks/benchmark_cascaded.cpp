@@ -33,7 +33,19 @@
 #include "benchmark_common.h"
 
 #include <algorithm>
-#include <getopt.h>
+#include <chrono>
+#include "getopt.h"
+
+constexpr timespec timepointToTimespec(
+    std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::nanoseconds>
+        tp)
+{
+  auto secs = std::chrono::time_point_cast<std::chrono::seconds>(tp);
+  auto ns = std::chrono::time_point_cast<std::chrono::nanoseconds>(tp)
+            - std::chrono::time_point_cast<std::chrono::nanoseconds>(secs);
+
+  return timespec{secs.time_since_epoch().count(), (long)ns.count()};
+}
 
 using namespace nvcomp;
 
@@ -137,8 +149,8 @@ static void run_benchmark(
   void* d_comp_out;
   CUDA_CHECK(cudaMalloc(&d_comp_out, comp_out_bytes));
 
-  struct timespec start, end;
-  clock_gettime(CLOCK_MONOTONIC, &start);
+  
+  auto start = std::chrono::high_resolution_clock::now();
 
   if (verbose_memory) {
     std::cout << "compression memory (input+output+temp) (B): "
@@ -164,7 +176,7 @@ static void run_benchmark(
       status == nvcompSuccess, "nvcompCascadedCompressAsync not successful");
   CUDA_CHECK(cudaStreamSynchronize(stream));
 
-  clock_gettime(CLOCK_MONOTONIC, &end);
+  auto end = std::chrono::high_resolution_clock::now();
 
   cudaFree(d_comp_temp);
   cudaFree(d_in_data);
@@ -173,7 +185,7 @@ static void run_benchmark(
             << ", compressed ratio: " << std::fixed << std::setprecision(2)
             << (double)data.size() * sizeof(T) / comp_out_bytes << std::endl;
   std::cout << "compression throughput (GB/s): "
-            << gbs(start, end, data.size() * sizeof(T)) << std::endl;
+            << gbs(timepointToTimespec(start), timepointToTimespec(end), data.size() * sizeof(T)) << std::endl;
 
   void* metadata_ptr;
 
@@ -215,7 +227,7 @@ static void run_benchmark(
   CUDA_CHECK(cudaMalloc(
       &decomp_out_ptr, decomp_bytes)); // also can use RMM_ALLOC instead
 
-  clock_gettime(CLOCK_MONOTONIC, &start);
+  start = std::chrono::high_resolution_clock::now();
 
   // execute decompression (asynchronous)
   status = nvcompDecompressAsync(
@@ -232,9 +244,12 @@ static void run_benchmark(
   CUDA_CHECK(cudaStreamSynchronize(stream));
 
   // stop timing and the profiler
-  clock_gettime(CLOCK_MONOTONIC, &end);
+  end = std::chrono::high_resolution_clock::now();
   std::cout << "decompression throughput (GB/s): "
-            << gbs(start, end, decomp_bytes) << std::endl;
+            << gbs(timepointToTimespec(start),
+                   timepointToTimespec(end),
+                   decomp_bytes)
+            << std::endl;
 
   nvcompDecompressDestroyMetadata(metadata_ptr);
 

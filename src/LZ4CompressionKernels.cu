@@ -345,7 +345,7 @@ public:
 
     inline __device__ void setAndAlignOffset(const position_type offset)
     {
-      static_assert(sizeof(size_t) == sizeof(const uint8_t*));
+      static_assert(sizeof(size_t) == sizeof(const uint8_t*),"sizeof(size_t) == sizeof(const uint8_t*)");
 
       const uint8_t* const alignedPtr = reinterpret_cast<const uint8_t*>(
           (reinterpret_cast<size_t>(m_compData + offset)

@@ -62,7 +62,7 @@ void nvcompDecompressDestroyMetadata(void* const metadata_ptr)
   }
 }
 
-nvcompError_t nvcompDecompressGetTempSize(
+__declspec(dllexport) nvcompError_t nvcompDecompressGetTempSize(
     const void* const metadata_ptr, size_t* const temp_bytes)
 {
   if (LZ4IsMetadata(metadata_ptr)) {

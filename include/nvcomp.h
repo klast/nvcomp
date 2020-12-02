@@ -104,8 +104,8 @@ void nvcompDecompressDestroyMetadata(void* metadata_ptr);
  *
  * @return nvcompSuccess if successful, and an error code otherwise.
  */
-nvcompError_t
-nvcompDecompressGetTempSize(const void* metadata_ptr, size_t* temp_bytes);
+__declspec(dllexport) nvcompError_t
+    nvcompDecompressGetTempSize(const void* metadata_ptr, size_t* temp_bytes);
 
 /**
  * @brief Computes the size of the uncompressed data in bytes.
@@ -115,8 +115,7 @@ nvcompDecompressGetTempSize(const void* metadata_ptr, size_t* temp_bytes);
  *
  * @return nvcompSuccess if successful, and an error code otherwise.
  */
-nvcompError_t
-nvcompDecompressGetOutputSize(const void* metadata_ptr, size_t* output_bytes);
+__declspec(dllexport) nvcompError_t nvcompDecompressGetOutputSize(const void* metadata_ptr, size_t* output_bytes);
 
 /**
  * @brief Get the type of the compressed data.

@@ -31,6 +31,11 @@
 #include "common.h"
 #include "CascadedCommon.h"
 
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #include <algorithm>
 #include <cassert>
 #include <climits>
